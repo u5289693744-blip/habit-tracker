@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0d1b2e;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 110px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-top: 8px;
+    }
+
+    .header h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.5px;
+    }
+
+    .header .subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .habits-list {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .habit-card {
+      background: linear-gradient(135deg, #1a2f4a 0%, #162640 100%);
+      border: 1px solid #1e3a5f;
+      border-radius: 18px;
+      padding: 18px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+
+    .habit-card.done {
+      background: linear-gradient(135deg, #0f3d2a 0%, #0d3326 100%);
+      border-color: #1a5c3a;
+    }
+
+    .habit-card:active {
+      transform: scale(0.97);
+    }
+
+    .checkbox-wrap {
+      flex-shrink: 0;
+    }
+
+    .habit-checkbox {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2.5px solid #3b82f6;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-size: 0;
+    }
+
+    .habit-card.done .habit-checkbox {
+      background: #22c55e;
+      border-color: #22c55e;
+      font-size: 1rem;
+    }
+
+    .habit-checkbox::after {
+      content: '✓';
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s ease;
+    }
+
+    .habit-card.done .habit-checkbox::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .habit-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .habit-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .habit-card.done .habit-name {
+      color: #86efac;
+    }
+
+    .habit-streak {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+    }
+
+    .fire-icon {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .streak-text {
+      font-size: 0.82rem;
+      color: #64748b;
+    }
+
+    .streak-number {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fb923c;
+    }
+
+    .habit-card.done .streak-text {
+      color: #4ade80;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #334155;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 6px;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .delete-btn:hover,
+    .delete-btn:focus {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+      outline: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #475569;
+      padding: 60px 16px;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .empty-state .big-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .add-btn-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px 24px;
+      background: linear-gradient(to top, #0d1b2e 60%, transparent);
+    }
+
+    .add-btn {
+      display: block;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 17px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.2px;
+    }
+
+    .add-btn:hover {
+      background: #2563eb;
+    }
+
+    .add-btn:active {
+      transform: scale(0.97);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      background: #152638;
+      border-radius: 24px 24px 0 0;
+      padding: 28px 20px 36px;
+      width: 100%;
+      max-width: 480px;
+      border-top: 1px solid #1e3a5f;
+    }
+
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      background: #2d4a6b;
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+
+    .modal h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #f1f5f9;
+    }
+
+    .modal input {
+      width: 100%;
+      background: #0d1b2e;
+      border: 2px solid #1e3a5f;
+      border-radius: 14px;
+      padding: 15px 16px;
+      font-size: 1rem;
+      color: #f1f5f9;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .modal input:focus {
+      border-color: #3b82f6;
+    }
+
+    .modal input::placeholder {
+      color: #334155;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .modal-cancel {
+      flex: 1;
+      background: #1e3a5f;
+      color: #94a3b8;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .modal-cancel:hover {
+      background: #2d4a6b;
+    }
+
+    .modal-save {
+      flex: 2;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .modal-save:hover {
+      background: #2563eb;
+    }
+
+    @media (min-width: 640px) {
+      body {
+        padding: 40px 24px 110px;
+      }
+
+      .header h1 {
+        font-size: 2.2rem;
+      }
+
+      .modal-overlay {
+        align-items: center;
+        padding: 24px;
+      }
+
+      .modal {
+        border-radius: 24px;
+        padding: 28px 24px;
+        max-width: 440px;
+      }
+
+      .modal-handle {
+        display: none;
+      }
+
+      .habit-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🌟 Moje nawyki</h1>
+    <div class="subtitle" id="dateDisplay"></div>
+  </div>
+
+  <div class="habits-list" id="habitsList"></div>
+
+  <div class="add-btn-container">
+    <button class="add-btn" onclick="openModal()">+ Dodaj nawyk</button>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h2>Nowy nawyk</h2>
+      <input
+        type="text"
+        id="newHabitInput"
+        placeholder="np. Pić 2 litry wody..."
+        maxlength="50"
+        autocomplete="off"
+      />
+      <div class="modal-buttons">
+        <button class="modal-cancel" onclick="closeModal()">Anuluj</button>
+        <button class="modal-save" onclick="saveNewHabit()">Dodaj nawyk</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Helpers ---
+
+    function todayStr() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function yesterdayStr() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d.toISOString().split('T')[0];
+    }
+
+    function streakLabel(n) {
+      if (n === 1) return 'dzień z rzędu';
+      return 'dni z rzędu';
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    // --- Storage ---
+
+    function loadHabits() {
+      const saved = localStorage.getItem('habitTracker_habits');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      return [
+        { id: 1, name: 'Bieganie',   streak: 0, lastChecked: null },
+        { id: 2, name: 'Czytanie',   streak: 0, lastChecked: null },
+        { id: 3, name: 'Medytacja',  streak: 0, lastChecked: null },
+      ];
+    }
+
+    function saveHabits(habits) {
+      localStorage.setItem('habitTracker_habits', JSON.stringify(habits));
+    }
+
+    // --- Streak logic ---
+
+    function effectiveStreak(habit) {
+      if (!habit.lastChecked) return 0;
+      const today = todayStr();
+      const yesterday = yesterdayStr();
+      if (habit.lastChecked === today || habit.lastChecked === yesterday) {
+        return habit.streak;
+      }
+      return 0;
+    }
+
+    function isCheckedToday(habit) {
+      return habit.lastChecked === todayStr();
+    }
+
+    // --- Render ---
+
+    function render() {
+      const habits = loadHabits();
+      const list = document.getElementById('habitsList');
+
+      if (habits.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="big-icon">🎯</div>
+            Nie masz jeszcze żadnych nawyków.<br>Dodaj swój pierwszy poniżej!
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = habits.map(h => {
+        const checked = isCheckedToday(h);
+        const streak   = effectiveStreak(h);
+        return `
+          <div class="habit-card ${checked ? 'done' : ''}" onclick="toggleHabit(${h.id})">
+            <div class="checkbox-wrap">
+              <div class="habit-checkbox"></div>
+            </div>
+            <div class="habit-info">
+              <div class="habit-name">${escapeHtml(h.name)}</div>
+              <div class="habit-streak">
+                <span class="fire-icon">🔥</span>
+                <span class="streak-number">${streak}</span>
+                <span class="streak-text">${streakLabel(streak)}</span>
+              </div>
+            </div>
+            <button
+              class="delete-btn"
+              onclick="event.stopPropagation(); deleteHabit(${h.id})"
+              title="Usuń nawyk"
+            >✕</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Actions ---
+
+    function toggleHabit(id) {
+      const habits  = loadHabits();
+      const habit   = habits.find(h => h.id === id);
+      if (!habit) return;
+
+      const today     = todayStr();
+      const yesterday = yesterdayStr();
+
+      if (isCheckedToday(habit)) {
+        // Uncheck: roll back
+        if (habit.streak <= 1) {
+          habit.streak      = 0;
+          habit.lastChecked = null;
+        } else {
+          habit.streak--;
+          habit.lastChecked = yesterday;
+        }
+      } else {
+        // Check
+        const current = effectiveStreak(habit);
+        if (habit.lastChecked === yesterday) {
+          habit.streak = current + 1;
+        } else {
+          habit.streak = 1;
+        }
+        habit.lastChecked = today;
+      }
+
+      saveHabits(habits);
+      render();
+    }
+
+    function deleteHabit(id) {
+      if (!confirm('Usunąć ten nawyk?')) return;
+      const habits = loadHabits().filter(h => h.id !== id);
+      saveHabits(habits);
+      render();
+    }
+
+    // --- Modal ---
+
+    function openModal() {
+      document.getElementById('newHabitInput').value = '';
+      document.getElementById('modalOverlay').classList.add('visible');
+      setTimeout(() => document.getElementById('newHabitInput').focus(), 80);
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('visible');
+    }
+
+    function saveNewHabit() {
+      const input = document.getElementById('newHabitInput');
+      const name  = input.value.trim();
+      if (!name) { input.focus(); return; }
+
+      const habits = loadHabits();
+      const newId  = habits.length > 0 ? Math.max(...habits.map(h => h.id)) + 1 : 1;
+      habits.push({ id: newId, name, streak: 0, lastChecked: null });
+      saveHabits(habits);
+      closeModal();
+      render();
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('modalOverlay').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+
+    // Keyboard shortcuts in modal
+    document.getElementById('newHabitInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter')  saveNewHabit();
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // --- Init ---
+
+    document.getElementById('dateDisplay').textContent = formatDate(todayStr());
+    render();
+  </script>
+</body>
+</html>
