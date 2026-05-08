@@ -142,6 +142,13 @@
       color: #64748b;
     }
 
+    .habit-category {
+      display: inline-block;
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
     .streak-number {
       font-weight: 700;
       font-size: 0.95rem;
@@ -278,6 +285,33 @@
       color: #334155;
     }
 
+    .modal select {
+      width: 100%;
+      background: #0d1b2e;
+      border: 2px solid #1e3a5f;
+      border-radius: 14px;
+      padding: 15px 16px;
+      font-size: 1rem;
+      color: #f1f5f9;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+      margin-top: 10px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+
+    .modal select:focus {
+      border-color: #3b82f6;
+    }
+
+    .modal select option {
+      background: #0d1b2e;
+      color: #f1f5f9;
+    }
+
     .modal-buttons {
       display: flex;
       gap: 10px;
@@ -372,6 +406,12 @@
         maxlength="50"
         autocomplete="off"
       />
+      <select id="newHabitCategory">
+        <option value="zdrowie">🏃 Zdrowie</option>
+        <option value="nauka">📚 Nauka</option>
+        <option value="praca">💼 Praca</option>
+        <option value="inne">✨ Inne</option>
+      </select>
       <div class="modal-buttons">
         <button class="modal-cancel" onclick="closeModal()">Anuluj</button>
         <button class="modal-save" onclick="saveNewHabit()">Dodaj nawyk</button>
@@ -381,6 +421,13 @@
 
   <script>
     // --- Helpers ---
+
+    const CATEGORY_LABELS = {
+      zdrowie: '🏃 Zdrowie',
+      nauka:   '📚 Nauka',
+      praca:   '💼 Praca',
+      inne:    '✨ Inne',
+    };
 
     function todayStr() {
       return new Date().toISOString().split('T')[0];
@@ -418,9 +465,9 @@
         return JSON.parse(saved);
       }
       return [
-        { id: 1, name: 'Bieganie',   streak: 0, lastChecked: null },
-        { id: 2, name: 'Czytanie',   streak: 0, lastChecked: null },
-        { id: 3, name: 'Medytacja',  streak: 0, lastChecked: null },
+        { id: 1, name: 'Bieganie',   category: 'zdrowie', streak: 0, lastChecked: null },
+        { id: 2, name: 'Czytanie',   category: 'nauka',   streak: 0, lastChecked: null },
+        { id: 3, name: 'Medytacja',  category: 'zdrowie', streak: 0, lastChecked: null },
       ];
     }
 
@@ -470,6 +517,7 @@
             </div>
             <div class="habit-info">
               <div class="habit-name">${escapeHtml(h.name)}</div>
+              ${h.category ? `<div class="habit-category">${CATEGORY_LABELS[h.category] || h.category}</div>` : ''}
               <div class="habit-streak">
                 <span class="fire-icon">🔥</span>
                 <span class="streak-number">${streak}</span>
@@ -531,6 +579,7 @@
 
     function openModal() {
       document.getElementById('newHabitInput').value = '';
+      document.getElementById('newHabitCategory').value = 'zdrowie';
       document.getElementById('modalOverlay').classList.add('visible');
       setTimeout(() => document.getElementById('newHabitInput').focus(), 80);
     }
@@ -540,13 +589,14 @@
     }
 
     function saveNewHabit() {
-      const input = document.getElementById('newHabitInput');
-      const name  = input.value.trim();
+      const input    = document.getElementById('newHabitInput');
+      const name     = input.value.trim();
       if (!name) { input.focus(); return; }
 
-      const habits = loadHabits();
-      const newId  = habits.length > 0 ? Math.max(...habits.map(h => h.id)) + 1 : 1;
-      habits.push({ id: newId, name, streak: 0, lastChecked: null });
+      const category = document.getElementById('newHabitCategory').value;
+      const habits   = loadHabits();
+      const newId    = habits.length > 0 ? Math.max(...habits.map(h => h.id)) + 1 : 1;
+      habits.push({ id: newId, name, category, streak: 0, lastChecked: null });
       saveHabits(habits);
       closeModal();
       render();
