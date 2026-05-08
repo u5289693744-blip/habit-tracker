@@ -5,39 +5,150 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Habit Tracker</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    /* ── CSS Variables ── */
+    :root {
+      --bg:                #0d1b2e;
+      --card-bg:           linear-gradient(135deg, #1a2f4a 0%, #162640 100%);
+      --card-bg-done:      linear-gradient(135deg, #0f3d2a 0%, #0d3326 100%);
+      --card-border:       #1e3a5f;
+      --card-border-done:  #1a5c3a;
+      --text-primary:      #f1f5f9;
+      --text-secondary:    #64748b;
+      --text-muted:        #475569;
+      --modal-bg:          #152638;
+      --modal-border:      #1e3a5f;
+      --input-bg:          #0d1b2e;
+      --input-border:      #1e3a5f;
+      --cancel-bg:         #1e3a5f;
+      --cancel-text:       #94a3b8;
+      --cancel-hover:      #2d4a6b;
+      --delete-color:      #334155;
+      --cal-empty:         #1e3a5f;
+      --cal-future-border: #1e3a5f;
+      --history-color:     #475569;
+      --history-hover:     #94a3b8;
+      --summary-bg:        rgba(59, 130, 246, 0.08);
+      --summary-border:    rgba(59, 130, 246, 0.2);
+      --add-gradient:      linear-gradient(to top, #0d1b2e 60%, transparent);
+      --theme-btn-bg:      rgba(255,255,255,0.05);
     }
 
+    body.light-mode {
+      --bg:                #f0f4f8;
+      --card-bg:           linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      --card-bg-done:      linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      --card-border:       #e2e8f0;
+      --card-border-done:  #86efac;
+      --text-primary:      #0f172a;
+      --text-secondary:    #64748b;
+      --text-muted:        #94a3b8;
+      --modal-bg:          #ffffff;
+      --modal-border:      #e2e8f0;
+      --input-bg:          #f8fafc;
+      --input-border:      #e2e8f0;
+      --cancel-bg:         #f1f5f9;
+      --cancel-text:       #64748b;
+      --cancel-hover:      #e2e8f0;
+      --delete-color:      #cbd5e1;
+      --cal-empty:         #e2e8f0;
+      --cal-future-border: #e2e8f0;
+      --history-color:     #94a3b8;
+      --history-hover:     #64748b;
+      --summary-bg:        rgba(59, 130, 246, 0.06);
+      --summary-border:    rgba(59, 130, 246, 0.15);
+      --add-gradient:      linear-gradient(to top, #f0f4f8 60%, transparent);
+      --theme-btn-bg:      rgba(0,0,0,0.05);
+    }
+
+    /* ── Reset ── */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      background-color: #0d1b2e;
-      color: #e2e8f0;
+      background-color: var(--bg);
+      color: var(--text-primary);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
       padding: 24px 16px 110px;
+      transition: background-color 0.3s, color 0.3s;
     }
 
+    /* ── Animations ── */
+    @keyframes checkPulse {
+      0%   { transform: scale(1);    box-shadow: none; }
+      45%  { transform: scale(1.28); box-shadow: 0 0 0 8px rgba(34,197,94,0.25); }
+      100% { transform: scale(1);    box-shadow: none; }
+    }
+
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-in { animation: slideInUp 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+
+    /* ── Header ── */
     .header {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 16px;
       padding-top: 8px;
+      position: relative;
     }
 
     .header h1 {
       font-size: 1.9rem;
       font-weight: 700;
-      color: #f1f5f9;
+      color: var(--text-primary);
       letter-spacing: -0.5px;
     }
 
     .header .subtitle {
       font-size: 0.85rem;
-      color: #64748b;
+      color: var(--text-secondary);
       margin-top: 4px;
     }
 
+    /* ── Theme button ── */
+    .theme-btn {
+      position: absolute;
+      top: 4px;
+      right: 0;
+      background: var(--theme-btn-bg);
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 12px;
+      line-height: 1;
+      transition: transform 0.25s, background 0.3s;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-btn:hover { transform: rotate(18deg) scale(1.1); }
+
+    /* ── Day summary ── */
+    .day-summary {
+      max-width: 480px;
+      margin: 0 auto 20px;
+      background: var(--summary-bg);
+      border: 1px solid var(--summary-border);
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      text-align: center;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .day-summary strong {
+      color: #3b82f6;
+      font-size: 1.05rem;
+    }
+
+    /* ── Habits list ── */
     .habits-list {
       max-width: 480px;
       margin: 0 auto;
@@ -46,31 +157,28 @@
       gap: 12px;
     }
 
+    /* ── Habit card ── */
     .habit-card {
-      background: linear-gradient(135deg, #1a2f4a 0%, #162640 100%);
-      border: 1px solid #1e3a5f;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 18px;
-      padding: 18px 16px;
+      padding: 18px 14px 18px 16px;
       display: flex;
       align-items: center;
       gap: 14px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s, border-color 0.3s;
       cursor: pointer;
     }
 
     .habit-card.done {
-      background: linear-gradient(135deg, #0f3d2a 0%, #0d3326 100%);
-      border-color: #1a5c3a;
+      background: var(--card-bg-done);
+      border-color: var(--card-border-done);
     }
 
-    .habit-card:active {
-      transform: scale(0.97);
-    }
+    .habit-card:active { transform: scale(0.97); }
 
-    .checkbox-wrap {
-      flex-shrink: 0;
-    }
+    .checkbox-wrap { flex-shrink: 0; }
 
     .habit-checkbox {
       width: 32px;
@@ -82,14 +190,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
-      font-size: 0;
+      transition: background 0.2s, border-color 0.2s;
     }
 
     .habit-card.done .habit-checkbox {
       background: #22c55e;
       border-color: #22c55e;
-      font-size: 1rem;
+      animation: checkPulse 0.45s ease forwards;
     }
 
     .habit-checkbox::after {
@@ -99,7 +206,7 @@
       font-size: 1rem;
       opacity: 0;
       transform: scale(0.5);
-      transition: all 0.2s ease;
+      transition: opacity 0.2s, transform 0.2s;
     }
 
     .habit-card.done .habit-checkbox::after {
@@ -107,41 +214,37 @@
       transform: scale(1);
     }
 
-    .habit-info {
-      flex: 1;
-      min-width: 0;
-    }
+    .habit-info { flex: 1; min-width: 0; }
 
     .habit-name {
       font-size: 1.05rem;
       font-weight: 600;
-      color: #f1f5f9;
+      color: var(--text-primary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      transition: color 0.2s;
     }
 
-    .habit-card.done .habit-name {
-      color: #86efac;
-    }
+    .habit-card.done .habit-name { color: #86efac; }
 
     .habit-streak {
       display: flex;
       align-items: center;
       gap: 5px;
       margin-top: 5px;
+      flex-wrap: wrap;
     }
 
-    .fire-icon {
-      font-size: 1rem;
-      line-height: 1;
-    }
+    .fire-icon   { font-size: 1rem; line-height: 1; }
+    .trophy-icon { font-size: 1rem; line-height: 1; }
 
-    .streak-text {
-      font-size: 0.82rem;
-      color: #64748b;
-    }
+    .streak-number { font-weight: 700; font-size: 0.95rem; color: #fb923c; }
+    .streak-text   { font-size: 0.82rem; color: var(--text-secondary); }
 
+    .habit-card.done .streak-text { color: #4ade80; }
+
+    /* ── Category badge ── */
     .habit-category {
       display: inline-block;
       font-size: 0.7rem;
@@ -151,76 +254,93 @@
       margin-top: 5px;
     }
 
-    .category-zdrowie {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-    }
+    .category-zdrowie { background: rgba(34,197,94,0.15);  color: #4ade80; }
+    .category-nauka   { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .category-praca   { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .category-inne    { background: rgba(139,92,246,0.15); color: #a78bfa; }
 
-    .category-nauka {
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-    }
-
-    .category-praca {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-    }
-
-    .category-inne {
-      background: rgba(139, 92, 246, 0.15);
-      color: #a78bfa;
-    }
-
-    .streak-number {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #fb923c;
-    }
-
-    .habit-card.done .streak-text {
-      color: #4ade80;
-    }
-
+    /* ── Delete button ── */
     .delete-btn {
       background: none;
       border: none;
-      color: #334155;
+      color: var(--delete-color);
       cursor: pointer;
-      font-size: 1rem;
-      padding: 6px;
-      border-radius: 8px;
+      padding: 8px;
+      border-radius: 10px;
       transition: color 0.2s, background 0.2s;
       flex-shrink: 0;
       line-height: 1;
+      min-width: 36px;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .delete-btn:hover,
     .delete-btn:focus {
       color: #ef4444;
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(239,68,68,0.1);
       outline: none;
     }
 
+    /* ── History toggle ── */
+    .history-toggle {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--history-color);
+      font-size: 0.88rem;
+      cursor: pointer;
+      padding: 12px 0 6px;
+      min-height: 44px;
+      text-align: center;
+      transition: color 0.2s;
+    }
+
+    .history-toggle:hover { color: var(--history-hover); }
+
+    /* ── Calendar ── */
+    .history-section {
+      display: none;
+      padding: 4px 2px 6px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 5px;
+    }
+
+    .cal-day { aspect-ratio: 1; border-radius: 6px; transition: opacity 0.2s; }
+    .cal-day:hover { opacity: 0.8; }
+
+    .cal-done  { background: #22c55e; }
+    .cal-empty { background: var(--cal-empty); }
+    .cal-future {
+      background: transparent;
+      border: 1px solid var(--cal-future-border);
+    }
+
+    /* ── Empty state ── */
     .empty-state {
       text-align: center;
-      color: #475569;
+      color: var(--text-muted);
       padding: 60px 16px;
       font-size: 1rem;
       line-height: 1.6;
     }
 
-    .empty-state .big-icon {
-      font-size: 3rem;
-      margin-bottom: 12px;
-    }
+    .empty-state .big-icon { font-size: 3rem; margin-bottom: 12px; }
 
+    /* ── Add button ── */
     .add-btn-container {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       padding: 12px 16px 24px;
-      background: linear-gradient(to top, #0d1b2e 60%, transparent);
+      background: var(--add-gradient);
+      transition: background 0.3s;
     }
 
     .add-btn {
@@ -240,42 +360,37 @@
       letter-spacing: 0.2px;
     }
 
-    .add-btn:hover {
-      background: #2563eb;
-    }
+    .add-btn:hover  { background: #2563eb; }
+    .add-btn:active { transform: scale(0.97); }
 
-    .add-btn:active {
-      transform: scale(0.97);
-    }
-
+    /* ── Modal ── */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0,0,0,0.65);
       z-index: 200;
       align-items: flex-end;
       justify-content: center;
       padding: 0;
     }
 
-    .modal-overlay.visible {
-      display: flex;
-    }
+    .modal-overlay.visible { display: flex; }
 
     .modal {
-      background: #152638;
+      background: var(--modal-bg);
       border-radius: 24px 24px 0 0;
       padding: 28px 20px 36px;
       width: 100%;
       max-width: 480px;
-      border-top: 1px solid #1e3a5f;
+      border-top: 1px solid var(--modal-border);
+      transition: background 0.3s, border-color 0.3s;
     }
 
     .modal-handle {
       width: 40px;
       height: 4px;
-      background: #2d4a6b;
+      background: var(--cancel-bg);
       border-radius: 2px;
       margin: 0 auto 20px;
     }
@@ -284,39 +399,34 @@
       font-size: 1.2rem;
       font-weight: 700;
       margin-bottom: 16px;
-      color: #f1f5f9;
+      color: var(--text-primary);
     }
 
     .modal input {
       width: 100%;
-      background: #0d1b2e;
-      border: 2px solid #1e3a5f;
+      background: var(--input-bg);
+      border: 2px solid var(--input-border);
       border-radius: 14px;
       padding: 15px 16px;
       font-size: 1rem;
-      color: #f1f5f9;
+      color: var(--text-primary);
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.3s, color 0.3s;
     }
 
-    .modal input:focus {
-      border-color: #3b82f6;
-    }
-
-    .modal input::placeholder {
-      color: #334155;
-    }
+    .modal input:focus        { border-color: #3b82f6; }
+    .modal input::placeholder { color: var(--text-muted); }
 
     .modal select {
       width: 100%;
-      background: #0d1b2e;
-      border: 2px solid #1e3a5f;
+      background: var(--input-bg);
+      border: 2px solid var(--input-border);
       border-radius: 14px;
       padding: 15px 16px;
       font-size: 1rem;
-      color: #f1f5f9;
+      color: var(--text-primary);
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.3s, color 0.3s;
       cursor: pointer;
       margin-top: 10px;
       appearance: none;
@@ -325,14 +435,8 @@
       background-position: right 16px center;
     }
 
-    .modal select:focus {
-      border-color: #3b82f6;
-    }
-
-    .modal select option {
-      background: #0d1b2e;
-      color: #f1f5f9;
-    }
+    .modal select:focus { border-color: #3b82f6; }
+    .modal select option { background: var(--input-bg); color: var(--text-primary); }
 
     .modal-buttons {
       display: flex;
@@ -342,8 +446,8 @@
 
     .modal-cancel {
       flex: 1;
-      background: #1e3a5f;
-      color: #94a3b8;
+      background: var(--cancel-bg);
+      color: var(--cancel-text);
       border: none;
       border-radius: 14px;
       padding: 15px;
@@ -352,9 +456,7 @@
       transition: background 0.2s;
     }
 
-    .modal-cancel:hover {
-      background: #2d4a6b;
-    }
+    .modal-cancel:hover { background: var(--cancel-hover); }
 
     .modal-save {
       flex: 2;
@@ -369,63 +471,15 @@
       transition: background 0.2s;
     }
 
-    .modal-save:hover {
-      background: #2563eb;
-    }
+    .modal-save:hover { background: #2563eb; }
 
-    .history-toggle {
-      display: block;
-      width: 100%;
-      background: none;
-      border: none;
-      color: #475569;
-      font-size: 0.78rem;
-      cursor: pointer;
-      padding: 8px 0 2px;
-      text-align: center;
-      transition: color 0.2s;
-    }
-
-    .history-toggle:hover {
-      color: #94a3b8;
-    }
-
-    .history-section {
-      display: none;
-      padding: 6px 2px 2px;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 5px;
-    }
-
-    .cal-day {
-      aspect-ratio: 1;
-      border-radius: 6px;
-    }
-
-    .cal-done  { background: #22c55e; }
-    .cal-empty { background: #1e3a5f; }
-    .cal-future {
-      background: transparent;
-      border: 1px solid #1e3a5f;
-    }
-
+    /* ── Desktop ── */
     @media (min-width: 640px) {
-      body {
-        padding: 40px 24px 110px;
-      }
+      body { padding: 40px 24px 110px; }
 
-      .header h1 {
-        font-size: 2.2rem;
-      }
+      .header h1 { font-size: 2.2rem; }
 
-      .modal-overlay {
-        align-items: center;
-        padding: 24px;
-      }
+      .modal-overlay { align-items: center; padding: 24px; }
 
       .modal {
         border-radius: 24px;
@@ -433,13 +487,11 @@
         max-width: 440px;
       }
 
-      .modal-handle {
-        display: none;
-      }
+      .modal-handle { display: none; }
 
       .habit-card:hover {
         transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.25);
       }
     }
   </style>
@@ -447,9 +499,12 @@
 <body>
 
   <div class="header">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Zmień motyw">🌙</button>
     <h1>🌟 Moje nawyki</h1>
     <div class="subtitle" id="dateDisplay"></div>
   </div>
+
+  <div class="day-summary" id="daySummary"></div>
 
   <div class="habits-list" id="habitsList"></div>
 
@@ -502,27 +557,39 @@
     }
 
     function streakLabel(n) {
-      if (n === 1) return 'dzień z rzędu';
-      return 'dni z rzędu';
+      return n === 1 ? 'dzień z rzędu' : 'dni z rzędu';
     }
 
     function escapeHtml(str) {
       return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function formatDate(dateStr) {
-      const d = new Date(dateStr + 'T12:00:00');
-      return d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+      return new Date(dateStr + 'T12:00:00')
+        .toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    // --- Theme ---
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-mode');
+      document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙';
+      localStorage.setItem('habitTracker_theme', isLight ? 'light' : 'dark');
+    }
+
+    function loadTheme() {
+      if (localStorage.getItem('habitTracker_theme') === 'light') {
+        document.body.classList.add('light-mode');
+        document.getElementById('themeBtn').textContent = '☀️';
+      }
     }
 
     // --- Storage ---
 
     function loadHabits() {
-      const saved = localStorage.getItem('habitTracker_habits');
+      const saved  = localStorage.getItem('habitTracker_habits');
       const habits = saved ? JSON.parse(saved) : [
         { id: 1, name: 'Bieganie',  category: 'zdrowie', streak: 0, lastChecked: null, prevStreak: 0, prevLastChecked: null, history: {} },
         { id: 2, name: 'Czytanie',  category: 'nauka',   streak: 0, lastChecked: null, prevStreak: 0, prevLastChecked: null, history: {} },
@@ -542,10 +609,8 @@
       let changed = false;
       habits.forEach(h => {
         if (h.lastChecked && h.lastChecked < yesterday) {
-          h.streak          = 0;
-          h.lastChecked     = null;
-          h.prevStreak      = 0;
-          h.prevLastChecked = null;
+          h.streak = 0; h.lastChecked = null;
+          h.prevStreak = 0; h.prevLastChecked = null;
           changed = true;
         }
       });
@@ -562,67 +627,64 @@
     const openHistories = new Set();
 
     function toggleHistory(id) {
-      if (openHistories.has(id)) {
-        openHistories.delete(id);
-      } else {
-        openHistories.add(id);
-      }
-      const section = document.getElementById('history-' + id);
-      const toggle  = document.getElementById('history-toggle-' + id);
-      const isOpen  = openHistories.has(id);
-      section.style.display = isOpen ? 'block' : 'none';
-      toggle.textContent    = isOpen ? 'Ukryj historię ▲' : 'Pokaż historię ▼';
+      openHistories.has(id) ? openHistories.delete(id) : openHistories.add(id);
+      const isOpen = openHistories.has(id);
+      document.getElementById('history-' + id).style.display = isOpen ? 'block' : 'none';
+      document.getElementById('history-toggle-' + id).textContent = isOpen ? 'Ukryj historię ▲' : 'Pokaż historię ▼';
     }
 
     function buildCalendar(habit) {
-      const now         = new Date();
-      const year        = now.getFullYear();
-      const month       = now.getMonth();
-      const today       = todayStr();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const history     = habit.history || {};
+      const now   = new Date();
+      const year  = now.getFullYear();
+      const month = now.getMonth();
+      const today = todayStr();
+      const days  = new Date(year, month + 1, 0).getDate();
+      const hist  = habit.history || {};
 
-      const squares = [];
-      for (let day = 1; day <= daysInMonth; day++) {
-        const d       = String(day).padStart(2, '0');
+      return '<div class="calendar-grid">' + Array.from({ length: days }, (_, i) => {
+        const day     = String(i + 1).padStart(2, '0');
         const m       = String(month + 1).padStart(2, '0');
-        const dateStr = `${year}-${m}-${d}`;
-        const label   = new Date(dateStr + 'T12:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
-        let cls = 'cal-day ';
-        if (dateStr > today)            cls += 'cal-future';
-        else if (history[dateStr])      cls += 'cal-done';
-        else                            cls += 'cal-empty';
-        squares.push(`<div class="${cls}" title="${label}"></div>`);
-      }
-      return `<div class="calendar-grid">${squares.join('')}</div>`;
+        const dateStr = `${year}-${m}-${day}`;
+        const label   = new Date(dateStr + 'T12:00:00')
+          .toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
+        const cls = dateStr > today ? 'cal-future' : hist[dateStr] ? 'cal-done' : 'cal-empty';
+        return `<div class="cal-day ${cls}" title="${label}"></div>`;
+      }).join('') + '</div>';
     }
 
     // --- Render ---
 
+    function updateSummary(habits) {
+      const total = habits.length;
+      const done  = habits.filter(h => isCheckedToday(h)).length;
+      const el    = document.getElementById('daySummary');
+      el.style.display = total === 0 ? 'none' : 'block';
+      el.innerHTML = `Dziś <strong>${done} z ${total}</strong> nawyków wykonanych`;
+    }
+
     function render() {
       const habits = loadHabits();
-      const list = document.getElementById('habitsList');
+      const list   = document.getElementById('habitsList');
+
+      updateSummary(habits);
 
       if (habits.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
             <div class="big-icon">🎯</div>
             Nie masz jeszcze żadnych nawyków.<br>Dodaj swój pierwszy poniżej!
-          </div>
-        `;
+          </div>`;
         return;
       }
 
       list.innerHTML = habits.map(h => {
-        const checked  = isCheckedToday(h);
-        const streak   = h.streak || 0;
-        const isOpen   = openHistories.has(h.id);
+        const checked = isCheckedToday(h);
+        const streak  = h.streak || 0;
+        const isOpen  = openHistories.has(h.id);
         return `
-          <div>
+          <div class="habit-item" data-id="${h.id}">
             <div class="habit-card ${checked ? 'done' : ''}" onclick="toggleHabit(${h.id})">
-              <div class="checkbox-wrap">
-                <div class="habit-checkbox"></div>
-              </div>
+              <div class="checkbox-wrap"><div class="habit-checkbox"></div></div>
               <div class="habit-info">
                 <div class="habit-name">${escapeHtml(h.name)}</div>
                 ${h.category ? `<div class="habit-category category-${h.category}">${CATEGORY_LABELS[h.category] || h.category}</div>` : ''}
@@ -630,13 +692,12 @@
                   <span class="fire-icon">🔥</span>
                   <span class="streak-number">${streak}</span>
                   <span class="streak-text">${streakLabel(streak)}</span>
+                  ${streak >= 7 ? '<span class="trophy-icon">🏆</span>' : ''}
                 </div>
               </div>
-              <button
-                class="delete-btn"
-                onclick="event.stopPropagation(); deleteHabit(${h.id})"
-                title="Usuń nawyk"
-              ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
+              <button class="delete-btn" onclick="event.stopPropagation(); deleteHabit(${h.id})" title="Usuń nawyk">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              </button>
             </div>
             <button class="history-toggle" id="history-toggle-${h.id}" onclick="toggleHistory(${h.id})">
               ${isOpen ? 'Ukryj historię ▲' : 'Pokaż historię ▼'}
@@ -644,8 +705,7 @@
             <div class="history-section" id="history-${h.id}" style="display:${isOpen ? 'block' : 'none'}">
               ${buildCalendar(h)}
             </div>
-          </div>
-        `;
+          </div>`;
       }).join('');
     }
 
@@ -679,8 +739,7 @@
       const habits = loadHabits();
       const habit  = habits.find(h => h.id === id);
       if (!confirm(`Czy na pewno chcesz usunąć nawyk „${habit ? habit.name : ''}"?`)) return;
-      const filtered = habits.filter(h => h.id !== id);
-      saveHabits(filtered);
+      saveHabits(habits.filter(h => h.id !== id));
       render();
     }
 
@@ -698,8 +757,8 @@
     }
 
     function saveNewHabit() {
-      const input    = document.getElementById('newHabitInput');
-      const name     = input.value.trim();
+      const input = document.getElementById('newHabitInput');
+      const name  = input.value.trim();
       if (!name) { input.focus(); return; }
 
       const category = document.getElementById('newHabitCategory').value;
@@ -709,14 +768,16 @@
       saveHabits(habits);
       closeModal();
       render();
+
+      // Animacja wjazdu tylko dla nowej karty
+      const newItem = document.querySelector(`.habit-item[data-id="${newId}"]`);
+      if (newItem) newItem.classList.add('slide-in');
     }
 
-    // Close modal on backdrop click
     document.getElementById('modalOverlay').addEventListener('click', function (e) {
       if (e.target === this) closeModal();
     });
 
-    // Keyboard shortcuts in modal
     document.getElementById('newHabitInput').addEventListener('keydown', function (e) {
       if (e.key === 'Enter')  saveNewHabit();
       if (e.key === 'Escape') closeModal();
@@ -724,6 +785,7 @@
 
     // --- Init ---
 
+    loadTheme();
     document.getElementById('dateDisplay').textContent = formatDate(todayStr());
     render();
   </script>
